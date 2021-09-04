@@ -1,22 +1,20 @@
-import { NewGravatar, UpdatedGravatar } from '../generated/Gravity/Gravity'
-import { Gravatar } from '../generated/schema'
+import { Transfer, YourCollectible } from '../generated/YourCollectible/YourCollectible'
+import { Collectible, User } from '../generated/schema'
 
-export function handleNewGravatar(event: NewGravatar): void {
-  let gravatar = new Gravatar(event.params.id.toHex())
-  gravatar.owner = event.params.owner
-  gravatar.displayName = event.params.displayName
-  gravatar.imageUrl = event.params.imageUrl
-  gravatar.save()
-}
-
-export function handleUpdatedGravatar(event: UpdatedGravatar): void {
-  let id = event.params.id.toHex()
-  let gravatar = Gravatar.load(id)
-  if (gravatar == null) {
-    gravatar = new Gravatar(id)
+export function handleTransfer(event: Transfer): void {
+  let collectible = Collectible.load(event.params.tokenId.toString())
+  if (!collectible) {
+    collectible = new Collectible(event.params.tokenId.toString())
   }
-  gravatar.owner = event.params.owner
-  gravatar.displayName = event.params.displayName
-  gravatar.imageUrl = event.params.imageUrl
-  gravatar.save()
+
+  let collectibleContract = YourCollectible.bind(event.address)
+  collectible.collectibleURI = collectibleContract.tokenURI(event.params.tokenId)
+  collectible.owner = event.params.to.toHexString()
+  collectible.save()
+
+  let user = User.load(event.params.to.toHexString())
+  if (!user) {
+    user = new User(event.params.to.toHexString())
+    user.save()
+  }
 }

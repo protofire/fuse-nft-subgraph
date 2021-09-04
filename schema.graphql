@@ -1,6 +1,9 @@
-type Gravatar @entity {
+type User @entity {
   id: ID!
-  owner: Bytes!
-  displayName: String!
-  imageUrl: String!
+}
+
+type Collectible @entity {
+  id: ID!
+  collectibleURI: String! 
+  owner: User!
 }
