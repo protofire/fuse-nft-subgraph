@@ -1,3 +1,4 @@
+import { ipfs, json } from '@graphprotocol/graph-ts'
 import { Transfer, YourCollectible } from '../generated/YourCollectible/YourCollectible'
 import { Collectible, User } from '../generated/schema'
 
@@ -8,7 +9,24 @@ export function handleTransfer(event: Transfer): void {
   }
 
   let collectibleContract = YourCollectible.bind(event.address)
-  collectible.collectibleURI = collectibleContract.tokenURI(event.params.tokenId)
+  let baseURI = collectibleContract.baseURI()
+  let tokenURI = collectibleContract.tokenURI(event.params.tokenId)
+  let hash = tokenURI.split(baseURI)[1]
+
+  if (hash) {
+    let data = ipfs.cat(hash)
+    if (!data) return
+
+    let value = json.fromBytes(data!).toObject()
+
+    if (data != null) {
+      collectible.name = value.get('name').toString()
+      collectible.description = value.get('description').toString()
+      collectible.imageURL = value.get('image').toString()
+    }
+  }
+
+  collectible.collectibleURI = tokenURI
   collectible.owner = event.params.to.toHexString()
   collectible.save()
 

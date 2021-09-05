@@ -4,6 +4,9 @@ type User @entity {
 
 type Collectible @entity {
   id: ID!
-  collectibleURI: String! 
+  name: String!
+  description: String!
+  imageURL: String!
+  collectibleURI: String!
   owner: User!
 }
