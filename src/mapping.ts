@@ -1,32 +1,59 @@
-import { ipfs, json } from '@graphprotocol/graph-ts'
-import { Transfer, YourCollectible } from '../generated/YourCollectible/YourCollectible'
+import { ipfs, json, log } from '@graphprotocol/graph-ts'
+import { Transfer, Erc721 } from '../generated/Collectible/Erc721'
 import { Collectible, User } from '../generated/schema'
+import { BASE_IPFS_URL, getIpfsURL, HTTP_SCHEME, IPFS_SCHEME } from './utils'
 
 export function handleTransfer(event: Transfer): void {
+  log.info('Parsing Transfer for txHash {}', [event.transaction.hash.toHexString()])
+
   let collectible = Collectible.load(event.params.tokenId.toString())
   if (!collectible) {
     collectible = new Collectible(event.params.tokenId.toString())
   }
 
-  let collectibleContract = YourCollectible.bind(event.address)
-  let baseURI = collectibleContract.baseURI()
-  let tokenURI = collectibleContract.tokenURI(event.params.tokenId)
-  let hash = tokenURI.split(baseURI)[1]
-
-  if (hash) {
-    let data = ipfs.cat(hash)
-    if (!data) return
-
-    let value = json.fromBytes(data!).toObject()
-
-    if (data != null) {
-      collectible.name = value.get('name').toString()
-      collectible.description = value.get('description').toString()
-      collectible.imageURL = value.get('image').toString()
-    }
+  let erc721Token = Erc721.bind(event.address)
+  let tokenURIResult = erc721Token.try_tokenURI(event.params.tokenId)
+  if (tokenURIResult.reverted) {
+    return
+  }
+  
+  let tokenURI = tokenURIResult.value
+  
+  let contentPath: string
+  if (tokenURI.includes(HTTP_SCHEME)) {
+    contentPath = tokenURI.split(BASE_IPFS_URL).join('')
+  } else if (tokenURI.includes(IPFS_SCHEME)) {
+    contentPath = tokenURI.split(IPFS_SCHEME).join('')
+  } else {
+    return
   }
 
-  collectible.collectibleURI = tokenURI
+  let data = ipfs.cat(contentPath)
+  if (!data) return
+
+  let value = json.fromBytes(data!).toObject()
+
+  if (data != null) {
+    collectible.name = value.get('name').toString()
+    collectible.description = value.get('description').toString()
+
+    let image = value.get('image').toString()
+    if (image.includes(IPFS_SCHEME)) {
+      image = getIpfsURL(image)
+    }
+    collectible.imageURL = image
+  }
+
+  let name = erc721Token.try_name()
+  if (!name.reverted) {
+    collectible.collectionName = name.value
+  }
+
+  let symbol = erc721Token.try_symbol()
+  if (!symbol.reverted) {
+    collectible.collectionSymbol = symbol.value
+  }
+
   collectible.owner = event.params.to.toHexString()
   collectible.save()
 
