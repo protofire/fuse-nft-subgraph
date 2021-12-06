@@ -1,4 +1,4 @@
-import { ipfs, json, log } from '@graphprotocol/graph-ts'
+import { ipfs, json, JSONValue, log, TypedMap } from '@graphprotocol/graph-ts'
 import { Transfer, Erc721 } from '../generated/Collectible/Erc721'
 import { Collectible, User } from '../generated/schema'
 import { BASE_IPFS_URL, getIpfsURL, HTTP_SCHEME, IPFS_SCHEME } from './utils'
@@ -31,8 +31,10 @@ export function handleTransfer(event: Transfer): void {
   let data = ipfs.cat(contentPath)
   if (!data) return
 
-  let value = json.fromBytes(data!).toObject()
+  let jsonResult = json.try_fromBytes(data!)
+  if (jsonResult.isError) return
 
+  let value = jsonResult.value.toObject()
   if (data != null) {
     collectible.name = value.get('name').toString()
     collectible.description = value.get('description').toString()
