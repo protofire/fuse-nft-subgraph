@@ -1,6 +1,6 @@
 specVersion: 0.0.2
 description: NFT subgraph for fuse
-repository: https://github.com/graphprotocol/example-subgraph
+repository: https://github.com/fuseio/fuse-nft-subgraph
 schema:
   file: ./schema.graphql
 dataSources:
