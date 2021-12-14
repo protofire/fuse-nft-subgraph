@@ -73,6 +73,7 @@ export function handleTransfer(event: Transfer): void {
   }
 
   collectible.owner = event.params.to.toHexString()
+  collectible.collectionAddress = event.address
   collectible.save()
 
   let user = User.load(event.params.to.toHexString())
