@@ -20,9 +20,9 @@ export function handleTransfer(event: Transfer): void {
   let tokenURI = tokenURIResult.value
   
   let contentPath: string
-  if (tokenURI.includes(HTTP_SCHEME)) {
+  if (tokenURI.startsWith(HTTP_SCHEME)) {
     contentPath = tokenURI.split(BASE_IPFS_URL).join('')
-  } else if (tokenURI.includes(IPFS_SCHEME)) {
+  } else if (tokenURI.startsWith(IPFS_SCHEME)) {
     contentPath = tokenURI.split(IPFS_SCHEME).join('')
   } else {
     return
@@ -36,14 +36,30 @@ export function handleTransfer(event: Transfer): void {
 
   let value = jsonResult.value.toObject()
   if (data != null) {
-    collectible.name = value.get('name').toString()
-    collectible.description = value.get('description').toString()
-
-    let image = value.get('image').toString()
-    if (image.includes(IPFS_SCHEME)) {
-      image = getIpfsURL(image)
+    let name = value.get('name')
+    if (name != null) {
+      collectible.name = name.toString()
+    } else {
+      return
     }
-    collectible.imageURL = image
+
+    let description = value.get('description')
+    if (description != null) {
+      collectible.description = description.toString()
+    } else {
+      return
+    }
+
+    let image = value.get('image')
+    if (image != null) {
+      let imageStr = image.toString()
+      if (imageStr.includes(IPFS_SCHEME)) {
+        imageStr = getIpfsURL(imageStr)
+      }
+      collectible.imageURL = imageStr
+    } else {
+      return
+    }
   }
 
   let name = erc721Token.try_name()
