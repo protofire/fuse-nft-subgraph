@@ -1,15 +1,14 @@
 specVersion: 0.0.2
 description: NFT subgraph for fuse
-repository: https://github.com/graphprotocol/example-subgraph
+repository: https://github.com/fuseio/fuse-nft-subgraph
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: YourCollectible
+    name: Collectible
     network: fuse
     source:
-      address: '0x6B51B198ddffc5f4e9231420351d677Cef99B6E4'
-      abi: YourCollectible
+      abi: Erc721
       startBlock: 12205859
     mapping:
       kind: ethereum/events
@@ -18,8 +17,8 @@ dataSources:
       entities:
         - Collectible
       abis:
-        - name: YourCollectible
-          file: ./abis/YourCollectible.json
+        - name: Erc721
+          file: ./abis/Erc721.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,indexed uint256)
           handler: handleTransfer
