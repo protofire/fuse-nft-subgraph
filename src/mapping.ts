@@ -6,9 +6,11 @@ import { BASE_IPFS_URL, getIpfsURL, HTTP_SCHEME, IPFS_SCHEME } from './utils'
 export function handleTransfer(event: Transfer): void {
   log.info('Parsing Transfer for txHash {}', [event.transaction.hash.toHexString()])
 
-  let collectible = Collectible.load(event.params.tokenId.toString())
+  let id = event.address.toHexString() + '-' + event.params.tokenId.toString()
+
+  let collectible = Collectible.load(id)
   if (!collectible) {
-    collectible = new Collectible(event.params.tokenId.toString())
+    collectible = new Collectible(id)
   }
 
   let erc721Token = Erc721.bind(event.address)
