@@ -1,14 +1,32 @@
-type User @entity {
+type Account @entity {
   id: ID!
+  address: Bytes!
+  collectibles: [Collectible!] @derivedFrom(field: "owner")
 }
 
 type Collectible @entity {
   id: ID!
-  collectionName: String!
-  collectionSymbol: String!
+  tokenId: BigInt!
+  creator: Account!
+  owner: Account!
+  collection: Collection!
+  descriptorUri: String!
+
+  #Timestamps
+  modified: BigInt!
+  created: BigInt!
+  removed: BigInt!
+
+  #metadata
+  name: String
+  description: String
+  imageURL: String
+}
+
+type Collection @entity {
+  id: ID!
+  collectionName: String
+  collectionSymbol: String
   collectionAddress: Bytes!
-  name: String!
-  description: String!
-  imageURL: String!
-  owner: User!
+  collectibles: [Collectible!] @derivedFrom(field: "collection")
 }
