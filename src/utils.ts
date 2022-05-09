@@ -17,9 +17,6 @@ export let BASE_IPINATA_URL = 'https://gateway.pinata.cloud/ipfs/'
 
 export let DWEB_IPFS_URL = "https://dweb.link/ipfs/";
 
-export let COZY_ASSET_URL =
-  "https://bafybeid64tyd25ovegjakaq6qyjyo332qzeqj3md6lygqgjg6aj5u5gybi.ipfs.dweb.link/";
-
 export let COZY_ADDRESS = Address.fromString(
   "0x32319834d90323127988E4e2DC7b2162d4262904"
 );
