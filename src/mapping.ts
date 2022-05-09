@@ -50,6 +50,19 @@ export function handleTransfer(event: Transfer): void {
             event.transaction.hash.toHexString(),
           ]);
         } else {
+          var descriptor = Erc721.bind(event.address).tokenURI(
+            event.params.tokenId
+          );
+          if(descriptor != item.descriptorUri) {
+            item.descriptorUri = descriptor;
+            readMetadata(item, item.descriptorUri);
+            log.info("Updated Metadata - tokenid: {}, txHash: {}", [
+              tokenId,
+              event.transaction.hash.toHexString(),
+            ]);
+          
+          }
+          
           // Transfer token
           item.owner = account.id;
           item.modified = event.block.timestamp;
