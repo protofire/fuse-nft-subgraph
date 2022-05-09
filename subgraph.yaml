@@ -1,18 +1,39 @@
-specVersion: 0.0.2
+specVersion: 0.0.4
+features:
+  - ipfsOnEthereumContracts
 description: NFT subgraph for fuse
 repository: https://github.com/fuseio/fuse-nft-subgraph
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Collectible
+    name: Erc721
     network: fuse
     source:
       abi: Erc721
-      startBlock: 12205859
+      startBlock: 12205858
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion:  0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Collectible
+      abis:
+        - name: Erc721
+          file: ./abis/Erc721.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+      file: ./src/template-mapping.ts
+templates:
+  - kind: ethereum/contract
+    name: ERC721
+    network: fuse
+    source:
+      abi: Erc721
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Collectible
