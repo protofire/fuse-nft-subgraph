@@ -26,11 +26,6 @@ export function getURIScheme(input: string): string {
 }
 
 export function getIpfsPath(ipfsURI: string): string {
-  let hash = ipfsURI.split("ipfs://")[1]
-  if(hash.includes("/"))
-  {
-    return ipfsURI.split("/")[0]
-  }
   return ipfsURI.split("ipfs://")[1];
 }
 
@@ -123,3 +118,4 @@ export function readMetadata(
 }
 return collectible;
 }
+
