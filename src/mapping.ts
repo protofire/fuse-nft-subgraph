@@ -5,6 +5,7 @@ import { Transfer, Erc721 } from "../generated/Erc721/Erc721";
 import { Collection,  Collectible } from "../generated/schema";
 import {
   ADDRESS_ZERO,
+  COZY_ADDRESS,
   getOrCreateAccount,
   readMetadata
 } from "./utils";
@@ -50,18 +51,24 @@ export function handleTransfer(event: Transfer): void {
             event.transaction.hash.toHexString(),
           ]);
         } else {
-          var descriptor = Erc721.bind(event.address).tokenURI(
-            event.params.tokenId
-          );
-          if(descriptor != item.descriptorUri) {
-            item.descriptorUri = descriptor;
-            readMetadata(item, item.descriptorUri);
-            log.info("Updated Metadata - tokenid: {}, txHash: {}", [
-              tokenId,
-              event.transaction.hash.toHexString(),
-            ]);
           
+          if(event.address.toHexString() == COZY_ADDRESS.toHexString() && item.revealed == null)
+          {
+            var descriptor = Erc721.bind(event.address).tokenURI(
+              event.params.tokenId
+            );
+            if(descriptor != item.descriptorUri) {
+              item.descriptorUri = descriptor;
+              item.revealed = true;
+              readMetadata(item, item.descriptorUri).save();
+              log.info("Updated Metadata - tokenid: {}, txHash: {}", [
+                tokenId,
+                event.transaction.hash.toHexString(),
+              ]);
+            
+            }
           }
+         
           
           // Transfer token
           item.owner = account.id;

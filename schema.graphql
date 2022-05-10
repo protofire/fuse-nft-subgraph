@@ -21,6 +21,7 @@ type Collectible @entity {
   name: String
   description: String
   imageURL: String
+  revealed: Boolean
 }
 
 type Collection @entity {
