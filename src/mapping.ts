@@ -27,6 +27,7 @@ export function handleTransfer(event: Transfer): void {
 
       item.creator = account.id;
       item.owner = item.creator;
+      item.revealed = false;
       item.tokenId = event.params.tokenId;
       item.collection = collection.id;
       item.descriptorUri = Erc721.bind(event.address).tokenURI(
@@ -52,7 +53,7 @@ export function handleTransfer(event: Transfer): void {
           ]);
         } else {
           
-          if(event.address.toHexString() == COZY_ADDRESS.toHexString() && item.revealed == null)
+          if(event.address.toHexString() == COZY_ADDRESS.toHexString() && item.revealed == false)
           {
             var descriptor = Erc721.bind(event.address).tokenURI(
               event.params.tokenId
@@ -60,7 +61,8 @@ export function handleTransfer(event: Transfer): void {
             if(descriptor != item.descriptorUri) {
               item.descriptorUri = descriptor;
               item.revealed = true;
-              readMetadata(item, item.descriptorUri).save();
+              item.save();
+              readMetadata(item, descriptor);
               log.info("Updated Metadata - tokenid: {}, txHash: {}", [
                 tokenId,
                 event.transaction.hash.toHexString(),

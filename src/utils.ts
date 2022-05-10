@@ -83,7 +83,7 @@ export function readMetadata(
   let data = ipfs.cat(contentPath)
   if (!data) return collectible;
 
-  let jsonResult = json.try_fromBytes(data!)
+  let jsonResult = json.try_fromBytes(data)
   if (jsonResult.isError) return collectible;
 
   let value = jsonResult.value.toObject()
