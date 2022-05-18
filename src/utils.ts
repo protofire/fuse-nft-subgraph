@@ -1,4 +1,4 @@
-import { Address, ipfs, json } from "@graphprotocol/graph-ts"
+import { Address, ipfs, json } from "@graphprotocol/graph-ts";
 import { Account, Collectible } from "../generated/schema";
 
 export const ADDRESS_ZERO = Address.fromString(
@@ -13,7 +13,7 @@ export let DATA_SCHEME = "data:application/json;base64,";
 
 export let BASE_IPFS_URL = "https://ipfs.io/ipfs/";
 
-export let BASE_IPINATA_URL = 'https://gateway.pinata.cloud/ipfs/'
+export let BASE_IPINATA_URL = "https://gateway.pinata.cloud/ipfs/";
 
 export let DWEB_IPFS_URL = "https://dweb.link/ipfs/";
 
@@ -30,8 +30,8 @@ export function getIpfsPath(ipfsURI: string): string {
 }
 
 export function getBase64(data: string): string {
-    return data.split(",")[1];
-  }
+  return data.split(",")[1];
+}
 
 export function getIpfsURL(ipfsURI: string): string {
   return BASE_IPFS_URL + getIpfsPath(ipfsURI);
@@ -44,7 +44,6 @@ export function getOrCreateAccount(
   let accountAddress = address.toHexString();
   let account = Account.load(accountAddress);
 
-   
   if (account == null) {
     account = new Account(accountAddress);
     account.address = address;
@@ -62,60 +61,55 @@ export function getDwebURL(ipfsURI: string): string {
   return ipfsURL;
 }
 
-
 export function readMetadata(
   collectible: Collectible,
   tokenURI: string
 ): Collectible {
-  
-  if(tokenURI != null || tokenURI != ""){
-
-  
-  let contentPath: string;
-  if (tokenURI.startsWith(HTTP_SCHEME)) {
-    contentPath = tokenURI.split(BASE_IPFS_URL).join('')
-  } else if (tokenURI.startsWith(IPFS_SCHEME)) {
-    contentPath = tokenURI.split(IPFS_SCHEME).join('')
-  } else {
-    return collectible
-  }
-
-  let data = ipfs.cat(contentPath)
-  if (!data) return collectible;
-
-  let jsonResult = json.try_fromBytes(data)
-  if (jsonResult.isError) return collectible;
-
-  let value = jsonResult.value.toObject()
-  if (value != null) {
-    let name = value.get('name')
-    if (name != null) {
-      collectible.name = name.toString()
+  if (tokenURI != null || tokenURI != "") {
+    let contentPath: string;
+    if (tokenURI.startsWith(HTTP_SCHEME)) {
+      contentPath = tokenURI.split(BASE_IPFS_URL).join("");
+    } else if (tokenURI.startsWith(IPFS_SCHEME)) {
+      contentPath = tokenURI.split(IPFS_SCHEME).join("");
     } else {
       return collectible;
     }
 
-    let description = value.get('description')
-    if (description != null) {
-      collectible.description = description.toString()
-    } else {
-      return collectible;
-    }
+    let data = ipfs.cat(contentPath);
+    if (!data) return collectible;
 
-    let image = value.get('image')
-    if (image != null) {
-      let imageStr = image.toString()
-      if (imageStr.includes(IPFS_SCHEME)) {
-        imageStr = getIpfsURL(imageStr)
+    let jsonResult = json.try_fromBytes(data);
+    if (jsonResult.isError) return collectible;
+
+    let value = jsonResult.value.toObject();
+    if (value != null) {
+      let name = value.get("name");
+      if (name != null) {
+        collectible.name = name.toString();
+      } else {
+        return collectible;
       }
-      collectible.imageURL = imageStr
-    } else {
-      return collectible;
+
+      let description = value.get("description");
+      if (description != null) {
+        collectible.description = description.toString();
+      } else {
+        return collectible;
+      }
+
+      let image = value.get("image");
+      if (image != null) {
+        let imageStr = image.toString();
+        if (imageStr.includes(IPFS_SCHEME)) {
+          imageStr = getIpfsURL(imageStr);
+        }
+        collectible.imageURL = imageStr;
+      } else {
+        return collectible;
+      }
     }
+    collectible.save();
+    return collectible;
   }
-  collectible.save();
   return collectible;
 }
-return collectible;
-}
-
