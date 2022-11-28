@@ -1,4 +1,4 @@
-import { ipfs, json, JSONValue, log, TypedMap } from '@graphprotocol/graph-ts'
+import { ipfs, json, JSONValue, JSONValueKind, log, TypedMap } from '@graphprotocol/graph-ts'
 import { Transfer, Erc721 } from '../generated/Collectible/Erc721'
 import { Collectible, User } from '../generated/schema'
 import { BASE_IPFS_URL, getIpfsURL, HTTP_SCHEME, IPFS_SCHEME } from './utils'
@@ -39,21 +39,21 @@ export function handleTransfer(event: Transfer): void {
   let value = jsonResult.value.toObject()
   if (data != null) {
     let name = value.get('name')
-    if (name != null) {
+    if (name != null && name.kind == JSONValueKind.STRING) {
       collectible.name = name.toString()
     } else {
       return
     }
 
     let description = value.get('description')
-    if (description != null) {
+    if (description != null && description.kind == JSONValueKind.STRING) {
       collectible.description = description.toString()
     } else {
       return
     }
 
     let image = value.get('image')
-    if (image != null) {
+    if (image != null && image.kind == JSONValueKind.STRING) {
       let imageStr = image.toString()
       if (imageStr.includes(IPFS_SCHEME)) {
         imageStr = getIpfsURL(imageStr)
