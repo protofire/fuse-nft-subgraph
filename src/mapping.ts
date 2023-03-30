@@ -22,9 +22,9 @@ export function handleTransfer(event: Transfer): void {
   let tokenURI = tokenURIResult.value
   
   let contentPath: string
-  if (tokenURI.startsWith(HTTP_SCHEME)) {
+  if (tokenURI.startsWith(HTTP_SCHEME) && tokenURI.length > HTTP_SCHEME.length) {
     contentPath = tokenURI.split(BASE_IPFS_URL).join('')
-  } else if (tokenURI.startsWith(IPFS_SCHEME)) {
+  } else if (tokenURI.startsWith(IPFS_SCHEME) && tokenURI.length > IPFS_SCHEME.length) {
     contentPath = tokenURI.split(IPFS_SCHEME).join('')
   } else {
     return
