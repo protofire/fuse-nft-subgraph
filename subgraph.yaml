@@ -1,6 +1,9 @@
 specVersion: 0.0.2
 description: NFT subgraph for fuse
 repository: https://github.com/fuseio/fuse-nft-subgraph
+graft:
+  base: QmRNJ1Loc2417Jso4oq7pSv3Xa49UPVShCBJPuWP3AoMnL
+  block: 20394913
 schema:
   file: ./schema.graphql
 dataSources:
@@ -9,7 +12,6 @@ dataSources:
     network: fuse
     source:
       abi: Erc721
-      startBlock: 12205859
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
