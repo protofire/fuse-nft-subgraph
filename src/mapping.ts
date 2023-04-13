@@ -2,7 +2,7 @@ import {
   log
 } from "@graphprotocol/graph-ts";
 import { Transfer, Erc721 } from "../generated/Erc721/Erc721";
-import { Collection,  Collectible } from "../generated/schema";
+import { Collection, Collectible } from "../generated/schema";
 import {
   ADDRESS_ZERO,
   COZY_ADDRESS,
@@ -18,7 +18,7 @@ export function handleTransfer(event: Transfer): void {
   let collection = Collection.load(event.address.toHex());
   if (collection != null) {
     let account = getOrCreateAccount(event.params.to);
-   
+
     let tokenId = event.address.toHexString() + "-" + event.params.tokenId.toHexString();
 
     if (event.params.from.toHexString() == ADDRESS_ZERO.toHexString()) {
@@ -52,13 +52,12 @@ export function handleTransfer(event: Transfer): void {
             event.transaction.hash.toHexString(),
           ]);
         } else {
-          
-          if(event.address.toHexString() == COZY_ADDRESS.toHexString() && item.revealed == false)
-          {
+
+          if (event.address.toHexString() == COZY_ADDRESS.toHexString() && item.revealed == false) {
             var descriptor = Erc721.bind(event.address).tokenURI(
               event.params.tokenId
             );
-            if(descriptor != item.descriptorUri) {
+            if (descriptor != item.descriptorUri) {
               item.descriptorUri = descriptor;
               item.revealed = true;
               item.save();
@@ -67,11 +66,11 @@ export function handleTransfer(event: Transfer): void {
                 tokenId,
                 event.transaction.hash.toHexString(),
               ]);
-            
+
             }
           }
-         
-          
+
+
           // Transfer token
           item.owner = account.id;
           item.modified = event.block.timestamp;

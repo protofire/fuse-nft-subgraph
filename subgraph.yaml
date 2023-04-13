@@ -1,7 +1,7 @@
 specVersion: 0.0.4
 features:
   - ipfsOnEthereumContracts
-description: NFT subgraph for fuse
+description: NFT subgraph for fuse v2
 repository: https://github.com/fuseio/fuse-nft-subgraph
 schema:
   file: ./schema.graphql
@@ -11,10 +11,10 @@ dataSources:
     network: fuse
     source:
       abi: Erc721
-      startBlock: 12205858
+      startBlock: 0
     mapping:
       kind: ethereum/events
-      apiVersion:  0.0.6
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Collectible

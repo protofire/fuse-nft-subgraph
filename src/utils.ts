@@ -1,4 +1,4 @@
-import { Address, ipfs, json } from "@graphprotocol/graph-ts";
+import { Address, ipfs, json, JSONValueKind } from "@graphprotocol/graph-ts";
 import { Account, Collectible } from "../generated/schema";
 
 export const ADDRESS_ZERO = Address.fromString(
@@ -61,9 +61,9 @@ export function readMetadata(
 ): Collectible {
   if (tokenURI != null || tokenURI != "") {
     let contentPath: string;
-    if (tokenURI.startsWith(HTTP_SCHEME)) {
+    if (tokenURI.startsWith(HTTP_SCHEME) && tokenURI.length > HTTP_SCHEME.length) {
       contentPath = tokenURI.split(BASE_IPFS_URL).join("");
-    } else if (tokenURI.startsWith(IPFS_SCHEME)) {
+    } else if (tokenURI.startsWith(IPFS_SCHEME) && tokenURI.length > IPFS_SCHEME.length) {
       contentPath = tokenURI.split(IPFS_SCHEME).join("");
     } else {
       return collectible;
@@ -78,21 +78,21 @@ export function readMetadata(
     let value = jsonResult.value.toObject();
     if (value != null) {
       let name = value.get("name");
-      if (name != null) {
+      if (name != null && name.kind == JSONValueKind.STRING) {
         collectible.name = name.toString();
       } else {
         return collectible;
       }
 
       let description = value.get("description");
-      if (description != null) {
+      if (description != null && description.kind == JSONValueKind.STRING) {
         collectible.description = description.toString();
       } else {
         return collectible;
       }
 
       let image = value.get("image");
-      if (image != null) {
+      if (image != null && image.kind == JSONValueKind.STRING) {
         let imageStr = image.toString();
         if (imageStr.includes(IPFS_SCHEME)) {
           imageStr = getIpfsURL(imageStr);
