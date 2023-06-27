@@ -58,9 +58,13 @@ export function handleTransfer(event: Transfer): void {
         } else {
 
           if (event.address.toHexString() == COZY_ADDRESS.toHexString() && item.revealed == false) {
-            var descriptor = Erc721.bind(event.address).tokenURI(
+            let tokenURIResult = Erc721.bind(event.address).try_tokenURI(
               event.params.tokenId
             );
+            if (tokenURIResult.reverted) {
+              return
+            }
+            var descriptor = tokenURIResult.value
             if (descriptor != item.descriptorUri) {
               item.descriptorUri = descriptor;
               item.revealed = true;
