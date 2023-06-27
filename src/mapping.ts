@@ -34,6 +34,7 @@ export function handleTransfer(event: Transfer): void {
         event.params.tokenId
       );
       if (tokenURIResult.reverted) {
+        log.warning('getTokenURI reverted', [])
         return
       }
       item.descriptorUri = tokenURIResult.value
@@ -62,6 +63,7 @@ export function handleTransfer(event: Transfer): void {
               event.params.tokenId
             );
             if (tokenURIResult.reverted) {
+              log.warning('getTokenURI reverted', [])
               return
             }
             var descriptor = tokenURIResult.value
