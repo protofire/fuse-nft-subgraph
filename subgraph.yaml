@@ -1,5 +1,6 @@
 specVersion: 0.0.4
 features:
+  - grafting
   - ipfsOnEthereumContracts
 description: NFT subgraph for fuse v2
 repository: https://github.com/fuseio/fuse-nft-subgraph
