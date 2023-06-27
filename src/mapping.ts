@@ -30,9 +30,13 @@ export function handleTransfer(event: Transfer): void {
       item.revealed = false;
       item.tokenId = event.params.tokenId;
       item.collection = collection.id;
-      item.descriptorUri = Erc721.bind(event.address).tokenURI(
+      let tokenURIResult = Erc721.bind(event.address).try_tokenURI(
         event.params.tokenId
       );
+      if (tokenURIResult.reverted) {
+        return
+      }
+      item.descriptorUri = tokenURIResult.value
       item.created = event.block.timestamp;
       item.save();
       item = readMetadata(item, item.descriptorUri);
