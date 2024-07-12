@@ -1,6 +1,6 @@
 {
   "name": "@fuseio/nft-subgraph",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "scripts": {
     "create": "graph create fuseio/fuse-nft --node https://api.thegraph.com/deploy/",
     "create-local": "graph create fuseio/fuse-nft --node http://127.0.0.1:8020",

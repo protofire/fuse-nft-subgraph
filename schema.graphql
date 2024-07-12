@@ -14,9 +14,9 @@ type Collectible @entity {
   revealed: Boolean!
 
   #Timestamps
-  modified: BigInt!
+  modified: BigInt
   created: BigInt!
-  removed: BigInt!
+  removed: BigInt
 
   #metadata
   name: String
