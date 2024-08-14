@@ -1,17 +1,7 @@
-import {
-  Address,
-  ethereum,
-  log,
-  store
-} from "@graphprotocol/graph-ts";
+import { Address, ethereum,log, store } from "@graphprotocol/graph-ts";
 import { Transfer, Erc721 } from "../generated/Erc721/Erc721";
 import { Collection, Collectible, IndexedBlock, CollectiblesOfIndexedBlock } from "../generated/schema";
-import {
-  ADDRESS_ZERO,
-  COZY_ADDRESS,
-  getOrCreateAccount,
-  readMetadata
-} from "./utils";
+import { ADDRESS_ZERO, COZY_ADDRESS, getOrCreateAccount, INDEXED_BLOCK_ID, readMetadata } from "./utils";
 
 export function handleTransfer(event: Transfer): void {
   log.info("Parsing Transfer for txHash {}", [
@@ -28,8 +18,12 @@ export function handleTransfer(event: Transfer): void {
       // Mint token
       let item = new Collectible(tokenId);
 
-      let id = event.block.number.toString();
-      let block = new IndexedBlock(id);
+      let block = IndexedBlock.load(INDEXED_BLOCK_ID);
+      if (block == null) {
+        block = new IndexedBlock(INDEXED_BLOCK_ID);
+      }
+
+      block.number = event.block.number;
       block.save();
 
       let collectiblesOfIndexedBlock = new CollectiblesOfIndexedBlock(tokenId)
@@ -85,8 +79,8 @@ export function handleTransfer(event: Transfer): void {
 
 export function handleBlock(block: ethereum.Block): void {
   let blockId = block.number.toString();
-  let indexedBlock = IndexedBlock.load(blockId);
-  if (indexedBlock == null) {
+  let indexedBlock = IndexedBlock.load(INDEXED_BLOCK_ID);
+  if (indexedBlock == null || blockId != indexedBlock.number.toString()) {
     return;
   }
 
@@ -133,5 +127,4 @@ export function handleBlock(block: ethereum.Block): void {
     }
     store.remove("CollectiblesOfIndexedBlock", collectiblesOfIndexedBlock.id);
   }
-  // store.remove("Block", blockId);
 }

@@ -5,6 +5,8 @@ export const ADDRESS_ZERO = Address.fromString(
   "0x0000000000000000000000000000000000000000"
 );
 
+export let INDEXED_BLOCK_ID= "indexed-block-id"
+
 export let IPFS_SCHEME = "ipfs://";
 
 export let HTTP_SCHEME = "https://";

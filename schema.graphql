@@ -34,6 +34,7 @@ type Collection @entity {
 
 type IndexedBlock @entity {
   id: ID!
+  number: BigInt!
   collectibles: [CollectiblesOfIndexedBlock!] @derivedFrom(field: "block")
 }
 
