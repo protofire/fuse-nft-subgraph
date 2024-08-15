@@ -22,7 +22,6 @@ type Collectible @entity {
   name: String
   description: String
   imageURL: String
-
 }
 
 type Collection @entity {
@@ -31,4 +30,15 @@ type Collection @entity {
   collectionSymbol: String
   collectionAddress: Bytes!
   collectibles: [Collectible!] @derivedFrom(field: "collection")
+}
+
+type IndexedBlock @entity {
+  id: ID!
+  number: BigInt!
+  collectibles: [CollectiblesOfIndexedBlock!] @derivedFrom(field: "block")
+}
+
+type CollectiblesOfIndexedBlock @entity {
+  id: ID!
+  block: IndexedBlock!
 }

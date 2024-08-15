@@ -1,4 +1,4 @@
-specVersion: 0.0.4
+specVersion: 0.0.8
 features:
   - ipfsOnEthereumContracts
 description: NFT subgraph for fuse
@@ -11,7 +11,7 @@ dataSources:
     network: fuse
     source:
       abi: Erc721
-      startBlock: 0
+      startBlock: 9122519
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -43,4 +43,6 @@ templates:
       eventHandlers:
         - event: Transfer(indexed address,indexed address,indexed uint256)
           handler: handleTransfer
+      blockHandlers:
+        - handler: handleBlock
       file: ./src/mapping.ts

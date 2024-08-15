@@ -1,14 +1,7 @@
-import {
-  log
-} from "@graphprotocol/graph-ts";
+import { Address, ethereum,log, store } from "@graphprotocol/graph-ts";
 import { Transfer, Erc721 } from "../generated/Erc721/Erc721";
-import { Collection, Collectible } from "../generated/schema";
-import {
-  ADDRESS_ZERO,
-  COZY_ADDRESS,
-  getOrCreateAccount,
-  readMetadata
-} from "./utils";
+import { Collection, Collectible, IndexedBlock, CollectiblesOfIndexedBlock } from "../generated/schema";
+import { ADDRESS_ZERO, COZY_ADDRESS, getOrCreateAccount, INDEXED_BLOCK_ID, readMetadata } from "./utils";
 
 export function handleTransfer(event: Transfer): void {
   log.info("Parsing Transfer for txHash {}", [
@@ -25,22 +18,28 @@ export function handleTransfer(event: Transfer): void {
       // Mint token
       let item = new Collectible(tokenId);
 
+      let block = IndexedBlock.load(INDEXED_BLOCK_ID);
+      if (block == null) {
+        block = new IndexedBlock(INDEXED_BLOCK_ID);
+      }
+
+      block.number = event.block.number;
+      block.save();
+
+      let collectiblesOfIndexedBlock = new CollectiblesOfIndexedBlock(tokenId)
+      collectiblesOfIndexedBlock.block = block.id;
+      collectiblesOfIndexedBlock.save();
+
       item.creator = account.id;
       item.owner = item.creator;
       item.revealed = false;
       item.tokenId = event.params.tokenId;
       item.collection = collection.id;
-      let tokenURIResult = Erc721.bind(event.address).try_tokenURI(
-        event.params.tokenId
-      );
-      if (tokenURIResult.reverted) {
-        log.warning('getTokenURI reverted', [])
-        return
-      }
-      item.descriptorUri = tokenURIResult.value
+    
+      item.descriptorUri = ''
       item.created = event.block.timestamp;
       item.save();
-      item = readMetadata(item, item.descriptorUri);
+
       log.info("MINT  - tokenid: {}, txHash: {}", [
         tokenId,
         event.transaction.hash.toHexString(),
@@ -52,35 +51,13 @@ export function handleTransfer(event: Transfer): void {
         if (event.params.to.toHexString() == ADDRESS_ZERO.toHexString()) {
           // Burn token
           item.removed = event.block.timestamp;
+          item.owner = ADDRESS_ZERO.toHexString();
+
           log.info("BURN - tokenid: {}, txHash: {}", [
             tokenId,
             event.transaction.hash.toHexString(),
           ]);
         } else {
-
-          if (event.address.toHexString() == COZY_ADDRESS.toHexString() && item.revealed == false) {
-            let tokenURIResult = Erc721.bind(event.address).try_tokenURI(
-              event.params.tokenId
-            );
-            if (tokenURIResult.reverted) {
-              log.warning('getTokenURI reverted', [])
-              return
-            }
-            var descriptor = tokenURIResult.value
-            if (descriptor != item.descriptorUri) {
-              item.descriptorUri = descriptor;
-              item.revealed = true;
-              item.save();
-              readMetadata(item, descriptor);
-              log.info("Updated Metadata - tokenid: {}, txHash: {}", [
-                tokenId,
-                event.transaction.hash.toHexString(),
-              ]);
-
-            }
-          }
-
-
           // Transfer token
           item.owner = account.id;
           item.modified = event.block.timestamp;
@@ -96,5 +73,58 @@ export function handleTransfer(event: Transfer): void {
         log.warning("Collectible #{} not exists", [tokenId]);
       }
     }
+  }
+}
+
+
+export function handleBlock(block: ethereum.Block): void {
+  let blockId = block.number.toString();
+  let indexedBlock = IndexedBlock.load(INDEXED_BLOCK_ID);
+  if (indexedBlock == null || blockId != indexedBlock.number.toString()) {
+    return;
+  }
+
+  let collectibles = indexedBlock.collectibles.load();
+
+  for (let i = 0; i < collectibles.length; i++) {
+    let collectiblesOfIndexedBlock = collectibles[i];
+
+    let collectible = Collectible.load(collectiblesOfIndexedBlock.id);
+
+    if (collectible !== null) {
+      let collectibleOwner = Address.fromString(collectible.owner);
+
+      if (collectibleOwner.toHexString() != ADDRESS_ZERO.toHexString()) {
+        let tokenURIResult = Erc721.bind(
+          Address.fromString(collectible.collection),
+        ).try_tokenURI(collectible.tokenId);
+
+        if (tokenURIResult.reverted) {
+          log.warning("getTokenURI reverted", []);
+          return;
+        }
+
+        if (
+          Address.fromString(collectible.collection).toHexString() ==
+            COZY_ADDRESS.toHexString() &&
+          collectible.revealed == false &&
+          tokenURIResult.value != collectible.descriptorUri
+        ) {
+          collectible.revealed = true;
+          collectible.descriptorUri = tokenURIResult.value;
+          collectible.save();
+
+          readMetadata(collectible, tokenURIResult.value);
+
+          log.info("Updated Metadata - CollectibleId: {}", [collectible.id]);
+        } else {
+          collectible.descriptorUri = tokenURIResult.value;
+          collectible.save();
+
+          readMetadata(collectible, collectible.descriptorUri);
+        }
+      }
+    }
+    store.remove("CollectiblesOfIndexedBlock", collectiblesOfIndexedBlock.id);
   }
 }
